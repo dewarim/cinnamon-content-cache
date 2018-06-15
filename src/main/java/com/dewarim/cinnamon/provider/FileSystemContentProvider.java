@@ -1,13 +1,12 @@
 package com.dewarim.cinnamon.provider;
 
-import com.dewarim.cinnamon.application.CinnamonServer;
+import com.dewarim.cinnamon.application.CinnamonCacheServer;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
-import java.util.UUID;
 
 import com.dewarim.cinnamon.model.ContentMeta;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,7 +24,7 @@ public class FileSystemContentProvider {
     private String dataRootPath;
 
     public FileSystemContentProvider() {
-        dataRootPath = CinnamonServer.config.getServerConfig().getDataRoot();
+        dataRootPath = CinnamonCacheServer.config.getServerConfig().getDataRoot();
     }
 
 

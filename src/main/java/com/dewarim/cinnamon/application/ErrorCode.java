@@ -45,6 +45,7 @@ public enum ErrorCode {
     PARENT_FOLDER_NOT_FOUND("parent folder not found"),
     PERMISSIONS_NOT_FOUND("no permissions found for user and acl"),
     RELATION_TYPE_NOT_FOUND("RelationType was not found."),
+    REMOTE_SERVER_ERROR("Remote Cinnamon Server returned an error."),
     REQUIRES_SUPERUSER_STATUS("action requires superuser status"),
     SESSION_NOT_FOUND("session not found"),
     STATIC__NO_PATH_TRAVERSAL("no path traversal allowed"),

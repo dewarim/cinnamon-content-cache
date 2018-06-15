@@ -46,4 +46,11 @@ public class CinnamonConfig {
         this.serverConfig = serverConfig;
     }
 
+    public RemoteConfig getRemoteConfig() {
+        return remoteConfig;
+    }
+
+    public void setRemoteConfig(RemoteConfig remoteConfig) {
+        this.remoteConfig = remoteConfig;
+    }
 }

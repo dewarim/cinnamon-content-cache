@@ -2,7 +2,7 @@ package com.dewarim.cinnamon.test.integration;
 
 
 
-public class OsdServletIntegrationTest {
+public class OsdServletIntegrationTest extends  CinnamonIntegrationTest{
 
 
 

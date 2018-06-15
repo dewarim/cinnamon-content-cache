@@ -18,38 +18,32 @@ import java.io.IOException;
 
 /**
  */
-public class CinnamonServer {
+public class CinnamonCacheServer {
 
     private int                  port;
     private Server               server;
     private WebAppContext        webAppContext = new WebAppContext();
     public static CinnamonConfig config        = new CinnamonConfig();
 
-    public CinnamonServer(int port) {
+    public CinnamonCacheServer(int port) {
         this.port = port;
-    }
-
-    public void start() throws Exception {
-
+        server = new Server(port);
         webAppContext.setContextPath("/");
         webAppContext.setResourceBase(".");
         webAppContext.getObjectFactory().addDecorator(new AnnotationDecorator(webAppContext));
 
         addServlets(webAppContext);
-        server = new Server(port);
-        server.setHandler(webAppContext);
-        server.start();
 
-        addSingletons();
+        server.setHandler(webAppContext);
     }
 
-    private void addSingletons() {
-
+    public void start() throws Exception {
+        server.start();
     }
 
 
     private void addServlets(WebAppContext handler) {
-        handler.addServlet(OsdServlet.class, "/api/osd/*");
+        handler.addServlet(ContentServlet.class, "/content/*");
     }
 
     public static void main(String[] args) throws Exception {
@@ -76,7 +70,7 @@ public class CinnamonServer {
             config.getServerConfig().setPort(cliArguments.port);
         }
 
-        CinnamonServer server = new CinnamonServer(config.getServerConfig().getPort());
+        CinnamonCacheServer server = new CinnamonCacheServer(config.getServerConfig().getPort());
         server.start();
         server.getServer().join();
     }
@@ -119,5 +113,9 @@ public class CinnamonServer {
 
         @Parameter(names = {"--help","-h"}, help = true, description = "Display help text.")
         boolean help;
+    }
+
+    public WebAppContext getWebAppContext() {
+        return webAppContext;
     }
 }

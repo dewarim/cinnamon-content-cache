@@ -6,12 +6,17 @@ public class RemoteConfig {
     private String  protocol   = "http";
     private Integer port       = 8080;
     private String  contentUrl = "/cinnamon/cinnamon/legacy?command=getcontent";
+    private String  currentUrl = "/cinnamon/cinnamon/legacy?command=iscurrent";
 
     public RemoteConfig() {
     }
 
-    public String generateUrl() {
+    public String generateGetContentUrl() {
         return String.format("%s://%s:%d%s", protocol, hostname, port, contentUrl);
+    }
+
+    public String generateIsCurrentUrl() {
+        return String.format("%s://%s:%d%s", protocol, hostname, port, currentUrl);
     }
 
     public String getHostname() {

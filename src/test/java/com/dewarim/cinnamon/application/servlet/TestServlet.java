@@ -3,7 +3,7 @@ package com.dewarim.cinnamon.application.servlet;
 import com.dewarim.cinnamon.application.ErrorCode;
 import com.dewarim.cinnamon.application.ErrorResponseGenerator;
 import com.dewarim.cinnamon.model.ContentMeta;
-import com.dewarim.cinnamon.model.request.*;
+import com.dewarim.cinnamon.model.request.ContentRequest;
 import com.dewarim.cinnamon.provider.FileSystemContentProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -19,14 +19,18 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
 
-import static javax.servlet.http.HttpServletResponse.*;
+import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static javax.servlet.http.HttpServletResponse.SC_OK;
 
-@MultipartConfig
-@WebServlet(name = "Osd", urlPatterns = "/")
-public class OsdServlet extends HttpServlet {
+/**
+ * This servlet acts like a Cinnamon 3 test server.
+ * It implements the methods getContent(id) and isCurrent(id,hash)
+ */
+@WebServlet(name = "Test", urlPatterns = "/")
+public class TestServlet extends HttpServlet {
 
     private              ObjectMapper         xmlMapper            = new XmlMapper();
-    private static final Logger               log                  = LogManager.getLogger(OsdServlet.class);
+    private static final Logger               log                  = LogManager.getLogger(TestServlet.class);
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
@@ -39,12 +43,17 @@ public class OsdServlet extends HttpServlet {
             case "/getContent":
                 getContent(request, response);
                 break;
+            case "/isCurrent":
+                isCurrent(request,response);
             default:
                 response.setStatus(HttpServletResponse.SC_NO_CONTENT);
         }
 
     }
 
+    private void isCurrent(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+    }
     private void getContent(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         ContentRequest contentRequest = xmlMapper.readValue(request.getInputStream(), ContentRequest.class);
         if (contentRequest.validated()) {

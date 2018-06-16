@@ -49,6 +49,14 @@ public class ContentMeta {
         this.contentSize = contentSize;
     }
 
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
     @Override
     public String toString() {
         return "ContentMeta{" +

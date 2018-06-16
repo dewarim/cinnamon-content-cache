@@ -4,6 +4,7 @@ import com.dewarim.cinnamon.application.ErrorCode;
 import com.dewarim.cinnamon.application.ErrorResponseGenerator;
 import com.dewarim.cinnamon.model.ContentMeta;
 import com.dewarim.cinnamon.model.request.ContentRequest;
+import com.dewarim.cinnamon.model.response.GenericResponse;
 import com.dewarim.cinnamon.provider.FileSystemContentProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -19,8 +20,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
 
-import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
-import static javax.servlet.http.HttpServletResponse.SC_OK;
+import static javax.servlet.http.HttpServletResponse.*;
+import static org.apache.http.entity.ContentType.APPLICATION_XML;
+import static org.apache.http.entity.mime.MIME.CONTENT_DISPOSITION;
 
 /**
  * This servlet acts like a Cinnamon 3 test server.
@@ -29,8 +31,10 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 @WebServlet(name = "Test", urlPatterns = "/")
 public class TestServlet extends HttpServlet {
 
-    private              ObjectMapper         xmlMapper            = new XmlMapper();
-    private static final Logger               log                  = LogManager.getLogger(TestServlet.class);
+    private              ObjectMapper xmlMapper  = new XmlMapper();
+    private static final Logger       log        = LogManager.getLogger(TestServlet.class);
+    public static        boolean      isCurrent  = false;
+    public static        boolean      hasContent = true;
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
@@ -44,47 +48,40 @@ public class TestServlet extends HttpServlet {
                 getContent(request, response);
                 break;
             case "/isCurrent":
-                isCurrent(request,response);
+                isCurrent(request, response);
+                break;
             default:
                 response.setStatus(HttpServletResponse.SC_NO_CONTENT);
         }
 
     }
 
-    private void isCurrent(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-    }
-    private void getContent(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        ContentRequest contentRequest = xmlMapper.readValue(request.getInputStream(), ContentRequest.class);
-        if (contentRequest.validated()) {
-            // 1. available?
-            FileSystemContentProvider contentProvider = new FileSystemContentProvider();
-            Optional<ContentMeta>     contentMetaOpt     = contentProvider.getContentMeta(contentRequest.getId());
-            if(contentMetaOpt.isPresent()){
-                // check with main server
-            }
-            else{
-                // get directly from main server
-            }
-
-//            contentProvider.getContentStream()
-
-            // 2. request from main server with hash
-
-            // 3. a) store new file
-
-
-
-//            InputStream     contentStream   = contentProvider.getContentStream(osd);
-//            response.setContentType(format.getContentType());
-            response.setStatus(SC_OK);
-//            contentStream.transferTo(response.getOutputStream());
+    private void isCurrent(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (isCurrent) {
+            response.setStatus(SC_NOT_MODIFIED);
+            response.setContentType(APPLICATION_XML.getMimeType());
+            response.getWriter().print("<cinnamon><successful>true</successful><message>CONTENT IS CURRENT</message></cinnamon>");
         } else {
-            generateErrorMessage(response, SC_BAD_REQUEST, ErrorCode.INVALID_REQUEST);
+            sendContentFile(response);
         }
     }
 
-    private void generateErrorMessage(HttpServletResponse response, int statusCode, ErrorCode errorCode) {
-        ErrorResponseGenerator.generateErrorMessage(response, statusCode, errorCode);
+    private void getContent(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (hasContent) {
+            sendContentFile(response);
+        } else {
+            response.setStatus(SC_NOT_FOUND);
+            response.setContentType(APPLICATION_XML.getMimeType());
+            response.getWriter().print("<error><code>NO CONTENT FOUND</code><message/></error>");
+        }
     }
+
+    private void sendContentFile(HttpServletResponse response) throws IOException{
+        response.setStatus(SC_OK);
+        response.setContentType(APPLICATION_XML.getMimeType());
+        response.setHeader(CONTENT_DISPOSITION, String.format("attachment; filename=\"%s\"", "HttpServletRequest.xml"));
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.writeValue(response.getWriter(), new GenericResponse("Fresh content with a generic response.", true));
+    }
+
 }

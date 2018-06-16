@@ -25,6 +25,7 @@ public enum ErrorCode {
     INTERNAL_SERVER_ERROR_TRY_AGAIN_LATER("internal server  please retry later"),
     INVALID_LINK_RESOLVER("Links to folders must have LinkResolver.FIXED."),
     INVALID_REQUEST("request is invalid check parameters"),
+    IO_EXCEPTION("Could not fetch content - I/O-Exception"),
     LOGIN_FAILED("login failed"),
     MISSING_FILE_PARAMETER("parameter 'file' for uploaded content is missing"),
     MISSING_SET_ACL_PERMISSION("missing set_acl permission"),

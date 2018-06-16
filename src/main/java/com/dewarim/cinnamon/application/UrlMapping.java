@@ -8,7 +8,7 @@ package com.dewarim.cinnamon.application;
 public enum UrlMapping {
 
 
-    OSD__GET_CONTENT("osd","getContent" ,"/api" ),
+    CONTENT__GET_CONTENT("content","getContent" ,"/" ),
     STATIC__ROOT("static", "", "");
 
     private String servlet;

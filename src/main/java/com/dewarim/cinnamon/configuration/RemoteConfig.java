@@ -43,6 +43,22 @@ public class RemoteConfig {
         this.contentUrl = contentUrl;
     }
 
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
+
+    public String getCurrentUrl() {
+        return currentUrl;
+    }
+
+    public void setCurrentUrl(String currentUrl) {
+        this.currentUrl = currentUrl;
+    }
+
     @Override
     public String toString() {
         return "RemoteConfig{" +

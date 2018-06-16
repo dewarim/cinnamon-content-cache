@@ -27,7 +27,7 @@ public class CinnamonIntegrationTest {
     
     static int                 cinnamonTestPort = 19999;
     static CinnamonCacheServer cinnamonCacheServer;
-    static String              ticket;
+    static String              ticket = "test";
     static String              HOST = "http://localhost:"+cinnamonTestPort;
     XmlMapper mapper = new XmlMapper();
     
@@ -35,7 +35,7 @@ public class CinnamonIntegrationTest {
     public static void setUpServer() throws Exception{
         if(cinnamonCacheServer == null) {
             cinnamonCacheServer = new CinnamonCacheServer(cinnamonTestPort);
-            cinnamonCacheServer.getWebAppContext().addServlet(TestServlet.class, "/content/*");
+            cinnamonCacheServer.getWebAppContext().addServlet(TestServlet.class, "/test/*");
             cinnamonCacheServer.start();
 
             // set data root:
@@ -70,7 +70,7 @@ public class CinnamonIntegrationTest {
      * @return the server's response.
      * @throws IOException if connection to server fails for some reason
      */
-    protected HttpResponse sendAdminRequest(UrlMapping urlMapping, Object request) throws IOException {
+    protected HttpResponse sendRequest(UrlMapping urlMapping, Object request) throws IOException {
         String requestStr = mapper.writeValueAsString(request);
         return Request.Post("http://localhost:" + cinnamonTestPort + urlMapping.getPath())
                 .addHeader("ticket", ticket)

@@ -89,10 +89,16 @@ public class ContentServlet extends HttpServlet {
                     }
                 } else {
                     // call getContent on remote server
-                    HttpResponse httpResponse = fetchRemoteFile(id, ticket);
-                    meta = getMetaFromResponse(id, httpResponse);
-                    meta = contentProvider.writeContentStream(meta, httpResponse.getEntity().getContent());
-                    contentStream = contentProvider.getContentStream(meta);
+                    try {
+                        HttpResponse httpResponse = fetchRemoteFile(id, ticket);
+                        meta = getMetaFromResponse(id, httpResponse);
+                        meta = contentProvider.writeContentStream(meta, httpResponse.getEntity().getContent());
+                        contentStream = contentProvider.getContentStream(meta);
+                    }
+                    catch (IOException io){
+                        ErrorResponseGenerator.generateErrorMessage(response, SC_NOT_FOUND, ErrorCode.IO_EXCEPTION, "Could not retrieve object.");
+                        return;
+                    }
                 }
                 // send content to client
                 if (contentStream != null) {

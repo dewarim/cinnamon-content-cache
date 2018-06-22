@@ -31,10 +31,11 @@ import static org.apache.http.entity.mime.MIME.CONTENT_DISPOSITION;
 @WebServlet(name = "Test", urlPatterns = "/")
 public class TestServlet extends HttpServlet {
 
-    private              ObjectMapper xmlMapper  = new XmlMapper();
-    private static final Logger       log        = LogManager.getLogger(TestServlet.class);
-    public static        boolean      isCurrent  = false;
-    public static        boolean      hasContent = true;
+    private              ObjectMapper    xmlMapper        = new XmlMapper();
+    private static final Logger          log              = LogManager.getLogger(TestServlet.class);
+    public static final  GenericResponse GENERIC_RESPONSE = new GenericResponse("Fresh content with a generic response.", true);
+    public static        boolean         isCurrent        = false;
+    public static        boolean         hasContent       = true;
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
@@ -76,12 +77,12 @@ public class TestServlet extends HttpServlet {
         }
     }
 
-    private void sendContentFile(HttpServletResponse response) throws IOException{
+    private void sendContentFile(HttpServletResponse response) throws IOException {
         response.setStatus(SC_OK);
         response.setContentType(APPLICATION_XML.getMimeType());
-        response.setHeader(CONTENT_DISPOSITION, String.format("attachment; filename=\"%s\"", "HttpServletRequest.xml"));
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.writeValue(response.getWriter(), new GenericResponse("Fresh content with a generic response.", true));
+        response.setHeader(CONTENT_DISPOSITION, String.format("attachment; filename=\"%s\"", "GenericResponse.xml"));
+        ObjectMapper mapper = new XmlMapper();
+        mapper.writeValue(response.getWriter(),GENERIC_RESPONSE );
     }
 
 }

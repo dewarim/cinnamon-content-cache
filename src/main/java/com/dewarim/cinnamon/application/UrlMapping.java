@@ -9,7 +9,7 @@ public enum UrlMapping {
 
 
     CONTENT__GET_CONTENT("content","getContent" ,"/" ),
-    STATIC__ROOT("static", "", "");
+    CONTENT__GET_NOTHING("content", "","/");
 
     private String servlet;
     private String action;

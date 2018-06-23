@@ -31,13 +31,18 @@ import static org.apache.http.entity.mime.MIME.CONTENT_DISPOSITION;
 @WebServlet(name = "Test", urlPatterns = "/")
 public class TestServlet extends HttpServlet {
 
-    private              ObjectMapper    xmlMapper        = new XmlMapper();
     private static final Logger          log              = LogManager.getLogger(TestServlet.class);
     public static final  GenericResponse GENERIC_RESPONSE = new GenericResponse("Fresh content with a generic response.", true);
     public static        boolean         isCurrent        = false;
     public static        boolean         hasContent       = true;
+    public static        int             statusCode       = SC_OK;
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        if (statusCode != SC_OK) {
+            response.setStatus(statusCode);
+            return;
+        }
 
         String pathInfo = request.getPathInfo();
         if (pathInfo == null) {
@@ -82,7 +87,7 @@ public class TestServlet extends HttpServlet {
         response.setContentType(APPLICATION_XML.getMimeType());
         response.setHeader(CONTENT_DISPOSITION, String.format("attachment; filename=\"%s\"", "GenericResponse.xml"));
         ObjectMapper mapper = new XmlMapper();
-        mapper.writeValue(response.getWriter(),GENERIC_RESPONSE );
+        mapper.writeValue(response.getWriter(), GENERIC_RESPONSE);
     }
 
 }

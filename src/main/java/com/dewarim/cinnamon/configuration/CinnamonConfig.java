@@ -11,7 +11,6 @@ public class CinnamonConfig {
     private String logbackLoggingConfigPath = "/opt/cinnamon/logback.xml";
         
     private String systemAdministratorEmail;
-    private MailConfig mailConfig = new MailConfig();
     private RemoteConfig remoteConfig = new RemoteConfig();
 
     public String getLogbackLoggingConfigPath() {
@@ -28,14 +27,6 @@ public class CinnamonConfig {
 
     public void setSystemAdministratorEmail(String systemAdministratorEmail) {
         this.systemAdministratorEmail = systemAdministratorEmail;
-    }
-
-    public MailConfig getMailConfig() {
-        return mailConfig;
-    }
-
-    public void setMailConfig(MailConfig mailConfig) {
-        this.mailConfig = mailConfig;
     }
 
     public ServerConfig getServerConfig() {

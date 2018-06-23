@@ -15,6 +15,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -57,7 +58,10 @@ public class CinnamonIntegrationTest {
     
     protected void assertCinnamonError(HttpResponse response, ErrorCode errorCode, int statusCode ) throws IOException{
         Assert.assertThat(response.getStatusLine().getStatusCode(), equalTo(statusCode));
-        CinnamonError cinnamonError = mapper.readValue(response.getEntity().getContent(), CinnamonError.class);
+        InputStream   contentStream       = response.getEntity().getContent();
+        String content = new String(contentStream.readAllBytes(), "UTF-8");
+        System.out.println("server response:\n"+content);
+        CinnamonError cinnamonError = mapper.readValue(content, CinnamonError.class);
         Assert.assertThat(cinnamonError.getCode(), equalTo(errorCode.getCode()));  
     }
 

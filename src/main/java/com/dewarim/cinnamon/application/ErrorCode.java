@@ -64,5 +64,4 @@ public enum ErrorCode {
         return code;
     }
 
-    public enum OBJECT_NOT_FOUND_OR_GONE {}
 }

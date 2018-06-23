@@ -26,9 +26,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static com.dewarim.cinnamon.application.servlet.TestServlet.GENERIC_RESPONSE;
-import static org.apache.http.HttpStatus.SC_NOT_FOUND;
-import static org.apache.http.HttpStatus.SC_OK;
+import static org.apache.http.HttpStatus.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ContentServletIntegrationTest extends CinnamonIntegrationTest {
 
@@ -63,7 +63,92 @@ public class ContentServletIntegrationTest extends CinnamonIntegrationTest {
     public void getNewContentFromCache() throws IOException {
         TestServlet.isCurrent = true;
         Long id = 2L;
+        createContentMeta(id);
+        ContentRequest contentRequest = new ContentRequest(ticket, id);
+        HttpResponse   response       = sendRequest(UrlMapping.CONTENT__GET_CONTENT, contentRequest);
+        StatusLine     statusLine     = response.getStatusLine();
+        int            statusCode     = statusLine.getStatusCode();
+        assertEquals(SC_OK, statusCode);
+        byte[] expectedBytes = Files.readAllBytes(Paths.get("pom.xml"));
+        byte[] actualBytes   = response.getEntity().getContent().readAllBytes();
+        assertEquals(new String(expectedBytes), new String(actualBytes));
+    }
 
+    @Test
+    public void remoteContentIsNewerThanCached() throws IOException {
+        TestServlet.isCurrent = false;
+        Long id = 4L;
+        ContentMeta contentMeta = createContentMeta(id);
+        ContentRequest contentRequest = new ContentRequest(ticket, id);
+        HttpResponse   response       = sendRequest(UrlMapping.CONTENT__GET_CONTENT, contentRequest);
+        StatusLine     statusLine     = response.getStatusLine();
+        int            statusCode     = statusLine.getStatusCode();
+        assertEquals(SC_OK, statusCode);
+        byte[] expectedBytes = Files.readAllBytes(Paths.get( contentMeta.getContentPath()));
+        byte[] actualBytes   = response.getEntity().getContent().readAllBytes();
+        assertEquals(new String(expectedBytes), new String(actualBytes));
+    }
+
+    @Test
+    public void getContentWithInvalidRequest() throws IOException {
+        TestServlet.hasContent = true;
+        ContentRequest contentRequest = new ContentRequest(ticket, 0L);
+        HttpResponse   response       = sendRequest(UrlMapping.CONTENT__GET_CONTENT, contentRequest);
+        assertCinnamonError(response, ErrorCode.INVALID_REQUEST);
+    }
+
+    @Test
+    public void getContentWhichDoesNotExist() throws IOException {
+        TestServlet.hasContent = false;
+        ContentRequest contentRequest = new ContentRequest(ticket, Long.MAX_VALUE);
+        HttpResponse   response       = sendRequest(UrlMapping.CONTENT__GET_CONTENT, contentRequest);
+        assertCinnamonError(response, ErrorCode.IO_EXCEPTION, SC_NOT_FOUND);
+    }
+
+    @Test
+    public void handleInternalServerError() throws IOException {
+        Long id = 3L;
+        createContentMeta(id);
+        ContentRequest contentRequest = new ContentRequest(ticket, id);
+
+        RemoteConfig backupConfig = remoteConfig;
+        CinnamonCacheServer.config.setRemoteConfig(null);
+        HttpResponse response = sendRequest(UrlMapping.CONTENT__GET_CONTENT, contentRequest);
+        assertCinnamonError(response, ErrorCode.INTERNAL_SERVER_ERROR_TRY_AGAIN_LATER, SC_INTERNAL_SERVER_ERROR);
+        CinnamonCacheServer.config.setRemoteConfig(backupConfig);
+    }
+    @Test
+    public void handleRemoteIOError() throws IOException {
+        Long id = 3L;
+        createContentMeta(id);
+        ContentRequest contentRequest = new ContentRequest(ticket, id);
+
+        CinnamonCacheServer.config.getRemoteConfig().setHostname("example.invalid");
+        HttpResponse response = sendRequest(UrlMapping.CONTENT__GET_CONTENT, contentRequest);
+        assertCinnamonError(response, ErrorCode.IO_EXCEPTION, SC_NOT_FOUND);
+        CinnamonCacheServer.config.getRemoteConfig().setHostname("localhost");
+    }
+
+    @Test
+    public void handleRemoteException() throws IOException{
+        TestServlet.statusCode = SC_INTERNAL_SERVER_ERROR;
+        Long id = 5L;
+        createContentMeta(id);
+        ContentRequest contentRequest = new ContentRequest(ticket, id);
+        HttpResponse response = sendRequest(UrlMapping.CONTENT__GET_CONTENT, contentRequest);
+        assertCinnamonError(response,ErrorCode.REMOTE_SERVER_ERROR, SC_INTERNAL_SERVER_ERROR);
+        TestServlet.statusCode = SC_OK;
+    }
+
+    // everything other than /getContent is an invalid request.
+    @Test
+    public void otherRequestsAreBad() throws IOException{
+        ContentRequest contentRequest = new ContentRequest(ticket, 6L);
+        HttpResponse response = sendRequest(UrlMapping.CONTENT__GET_NOTHING, contentRequest);
+        assertEquals(SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
+    }
+
+    private ContentMeta createContentMeta(Long id) throws IOException {
         Path tempDir = Files.createTempDirectory("cinnamon-content-cache-test-");
         config.getServerConfig().setDataRoot(tempDir.toFile().getAbsolutePath());
         FileSystemContentProvider contentProvider = new FileSystemContentProvider();
@@ -73,32 +158,7 @@ public class ContentServletIntegrationTest extends CinnamonIntegrationTest {
         contentMeta.setContentType("text/plain");
         contentMeta.setId(id);
         contentMeta.setContentHash("ignored by test servlet");
-        ContentMeta meta = contentProvider.writeContentStream(contentMeta, inputStream);
-
-        ContentRequest contentRequest = new ContentRequest(ticket, id);
-        HttpResponse   response       = sendRequest(UrlMapping.CONTENT__GET_CONTENT, contentRequest);
-        StatusLine     statusLine     = response.getStatusLine();
-        int            statusCode     = statusLine.getStatusCode();
-        assertEquals(SC_OK, statusCode);
-        byte[] expectedBytes = Files.readAllBytes(Paths.get("pom.xml"));
-        byte[] actualBytes = response.getEntity().getContent().readAllBytes();
-        assertEquals(new String(expectedBytes),new String(actualBytes));
-    }
-
-    @Test
-    public void getContentWithInvalidRequest() throws IOException{
-        TestServlet.hasContent = true;
-        ContentRequest contentRequest = new ContentRequest(ticket, 0L);
-        HttpResponse   response       = sendRequest(UrlMapping.CONTENT__GET_CONTENT, contentRequest);
-        assertCinnamonError(response, ErrorCode.INVALID_REQUEST);
-    }
-
-    @Test
-    public void getContentWhichDoesNotExist() throws IOException{
-        TestServlet.hasContent = false;
-        ContentRequest contentRequest = new ContentRequest(ticket, Long.MAX_VALUE);
-        HttpResponse   response       = sendRequest(UrlMapping.CONTENT__GET_CONTENT, contentRequest);
-        assertCinnamonError(response, ErrorCode.IO_EXCEPTION, SC_NOT_FOUND);
+        return contentProvider.writeContentStream(contentMeta, inputStream);
     }
 
 }

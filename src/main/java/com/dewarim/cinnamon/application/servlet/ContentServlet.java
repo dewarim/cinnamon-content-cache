@@ -46,7 +46,7 @@ public class ContentServlet extends HttpServlet {
                 getContent(request, response);
                 break;
             default:
-                response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
 
     }
@@ -84,21 +84,15 @@ public class ContentServlet extends HttpServlet {
                             contentStream = contentProvider.getContentStream(meta);
                             break;
                         default:
-                            ErrorResponseGenerator.generateErrorMessage(response, statusCode, ErrorCode.REMOTE_SERVER_ERROR, statusLine.getReasonPhrase());
+                            ErrorResponseGenerator.generateErrorMessage(response, statusCode, ErrorCode.REMOTE_SERVER_ERROR, String.valueOf(statusLine.getStatusCode()));
                             return;
                     }
                 } else {
                     // call getContent on remote server
-                    try {
-                        HttpResponse httpResponse = fetchRemoteFile(id, ticket);
-                        meta = getMetaFromResponse(id, httpResponse);
-                        meta = contentProvider.writeContentStream(meta, httpResponse.getEntity().getContent());
-                        contentStream = contentProvider.getContentStream(meta);
-                    }
-                    catch (IOException io){
-                        ErrorResponseGenerator.generateErrorMessage(response, SC_NOT_FOUND, ErrorCode.IO_EXCEPTION, "Could not retrieve object.");
-                        return;
-                    }
+                    HttpResponse httpResponse = fetchRemoteFile(id, ticket);
+                    meta = getMetaFromResponse(id, httpResponse);
+                    meta = contentProvider.writeContentStream(meta, httpResponse.getEntity().getContent());
+                    contentStream = contentProvider.getContentStream(meta);
                 }
                 // send content to client
                 if (contentStream != null) {
@@ -111,7 +105,10 @@ public class ContentServlet extends HttpServlet {
                 }
             } catch (IOException e) {
                 log.info("Failed to fetch content: ", e);
-                ErrorResponseGenerator.generateErrorMessage(response, SC_INTERNAL_SERVER_ERROR, ErrorCode.IO_EXCEPTION, e.getMessage());
+                ErrorResponseGenerator.generateErrorMessage(response, SC_NOT_FOUND, ErrorCode.IO_EXCEPTION, e.getMessage());
+            } catch (Exception e) {
+                log.info("Failed to fetch content: ", e);
+                ErrorResponseGenerator.generateErrorMessage(response, SC_INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_SERVER_ERROR_TRY_AGAIN_LATER, e.getMessage());
             }
         } else {
             ErrorResponseGenerator.generateErrorMessage(response, SC_BAD_REQUEST, ErrorCode.INVALID_REQUEST);

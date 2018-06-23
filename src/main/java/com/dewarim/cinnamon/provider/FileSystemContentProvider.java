@@ -6,6 +6,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 
 import com.dewarim.cinnamon.model.ContentMeta;
@@ -62,7 +63,7 @@ public class FileSystemContentProvider {
         log.debug("created subfolder {}: {}", subfolderPath, result);
         String contentPath  = subfolderPath + SEP + id ;
         Path   contentFile  = Paths.get(subfolderPath, id.toString());
-        long   bytesWritten = Files.copy(inputStream, contentFile);
+        long   bytesWritten = Files.copy(inputStream, contentFile, StandardCopyOption.REPLACE_EXISTING);
 
         ContentMeta lightMeta = new ContentMeta();
         lightMeta.setContentSize(bytesWritten);

@@ -7,8 +7,8 @@ import java.util.Objects;
  * (Just using http status code 204 is a little ambiguous)
  */
 public class GenericResponse {
-    
-    private String message;
+
+    private String  message;
     private boolean successful;
 
     public GenericResponse() {

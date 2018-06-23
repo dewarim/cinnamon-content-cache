@@ -7,6 +7,8 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+import static org.apache.http.entity.ContentType.APPLICATION_XML;
+
 public class ErrorResponseGenerator {
     
     private static ObjectMapper xmlMapper = new XmlMapper();
@@ -15,6 +17,8 @@ public class ErrorResponseGenerator {
         CinnamonError error = new CinnamonError(errorCode.getCode(), message);
         try {
             response.setStatus(statusCode);
+            response.setContentType(APPLICATION_XML.getMimeType());
+            response.setCharacterEncoding("UTF-8");
             xmlMapper.writeValue(response.getWriter(), error);
         }
         catch (IOException e){

@@ -3,6 +3,7 @@ package com.dewarim.cinnamon.test.integration;
 
 import com.dewarim.cinnamon.application.CinnamonCacheServer;
 import com.dewarim.cinnamon.application.ErrorCode;
+import com.dewarim.cinnamon.application.LockService;
 import com.dewarim.cinnamon.application.UrlMapping;
 import com.dewarim.cinnamon.application.servlet.TestServlet;
 import com.dewarim.cinnamon.configuration.CinnamonConfig;
@@ -15,6 +16,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.eclipse.jetty.util.BlockingArrayQueue;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,6 +28,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayDeque;
+import java.util.Queue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static com.dewarim.cinnamon.application.servlet.TestServlet.GENERIC_RESPONSE;
 import static org.apache.http.HttpStatus.*;
@@ -31,6 +41,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class ContentServletIntegrationTest extends CinnamonIntegrationTest {
+
+    private static final Logger log = LogManager.getLogger(ContentServletIntegrationTest.class);
+
 
     CinnamonConfig config;
     RemoteConfig   remoteConfig;
@@ -77,14 +90,14 @@ public class ContentServletIntegrationTest extends CinnamonIntegrationTest {
     @Test
     public void remoteContentIsNewerThanCached() throws IOException {
         TestServlet.isCurrent = false;
-        Long id = 4L;
-        ContentMeta contentMeta = createContentMeta(id);
+        Long           id             = 4L;
+        ContentMeta    contentMeta    = createContentMeta(id);
         ContentRequest contentRequest = new ContentRequest(ticket, id);
         HttpResponse   response       = sendRequest(UrlMapping.CONTENT__GET_CONTENT, contentRequest);
         StatusLine     statusLine     = response.getStatusLine();
         int            statusCode     = statusLine.getStatusCode();
         assertEquals(SC_OK, statusCode);
-        byte[] expectedBytes = Files.readAllBytes(Paths.get( contentMeta.getContentPath()));
+        byte[] expectedBytes = Files.readAllBytes(Paths.get(contentMeta.getContentPath()));
         byte[] actualBytes   = response.getEntity().getContent().readAllBytes();
         assertEquals(new String(expectedBytes), new String(actualBytes));
     }
@@ -117,6 +130,7 @@ public class ContentServletIntegrationTest extends CinnamonIntegrationTest {
         assertCinnamonError(response, ErrorCode.INTERNAL_SERVER_ERROR_TRY_AGAIN_LATER, SC_INTERNAL_SERVER_ERROR);
         CinnamonCacheServer.config.setRemoteConfig(backupConfig);
     }
+
     @Test
     public void handleRemoteIOError() throws IOException {
         Long id = 3L;
@@ -130,22 +144,55 @@ public class ContentServletIntegrationTest extends CinnamonIntegrationTest {
     }
 
     @Test
-    public void handleRemoteException() throws IOException{
+    public void handleRemoteException() throws IOException {
         TestServlet.statusCode = SC_INTERNAL_SERVER_ERROR;
         Long id = 5L;
         createContentMeta(id);
         ContentRequest contentRequest = new ContentRequest(ticket, id);
-        HttpResponse response = sendRequest(UrlMapping.CONTENT__GET_CONTENT, contentRequest);
-        assertCinnamonError(response,ErrorCode.REMOTE_SERVER_ERROR, SC_INTERNAL_SERVER_ERROR);
+        HttpResponse   response       = sendRequest(UrlMapping.CONTENT__GET_CONTENT, contentRequest);
+        assertCinnamonError(response, ErrorCode.REMOTE_SERVER_ERROR, SC_INTERNAL_SERVER_ERROR);
         TestServlet.statusCode = SC_OK;
     }
 
     // everything other than /getContent is an invalid request.
     @Test
-    public void otherRequestsAreBad() throws IOException{
+    public void otherRequestsAreBad() throws IOException {
         ContentRequest contentRequest = new ContentRequest(ticket, 6L);
-        HttpResponse response = sendRequest(UrlMapping.CONTENT__GET_NOTHING, contentRequest);
+        HttpResponse   response       = sendRequest(UrlMapping.CONTENT__GET_NOTHING, contentRequest);
         assertEquals(SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
+    }
+
+    @Test
+    public void parallelRequests() throws IOException, InterruptedException {
+        BlockingArrayQueue<Runnable> runnables = new BlockingArrayQueue<>();
+        ThreadPoolExecutor           executor  = new ThreadPoolExecutor(8, 16, 10, TimeUnit.SECONDS, runnables);
+        TestServlet.waitForMillis = 1000L;
+        final AtomicLong counter = new AtomicLong();
+        TestServlet.isCurrent = false;
+        for (int x = 0; x < 32; x++) {
+            executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        TestServlet.isCurrent = counter.incrementAndGet() % 2 == 0;
+                        Long id = 9L;
+                        createContentMeta(id);
+                        ContentRequest contentRequest = new ContentRequest(ticket, id);
+                        HttpResponse   response       = sendRequest(UrlMapping.CONTENT__GET_CONTENT, contentRequest);
+                        StatusLine     statusLine     = response.getStatusLine();
+                        int            statusCode     = statusLine.getStatusCode();
+                        assertEquals(SC_OK, statusCode);
+                    } catch (IOException e) {
+                        log.error(e);
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
+        }
+
+        executor.awaitTermination(4, TimeUnit.SECONDS);
+        TestServlet.waitForMillis = 0;
+
     }
 
     private ContentMeta createContentMeta(Long id) throws IOException {

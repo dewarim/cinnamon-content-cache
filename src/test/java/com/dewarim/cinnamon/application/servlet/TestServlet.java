@@ -36,6 +36,7 @@ public class TestServlet extends HttpServlet {
     public static        boolean         isCurrent        = false;
     public static        boolean         hasContent       = true;
     public static        int             statusCode       = SC_OK;
+    public static        long            waitForMillis    = 0;
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
@@ -64,10 +65,12 @@ public class TestServlet extends HttpServlet {
 
     private void isCurrent(HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (isCurrent) {
+            log.debug("Object is current");
             response.setStatus(SC_NOT_MODIFIED);
             response.setContentType(APPLICATION_XML.getMimeType());
             response.getWriter().print("<cinnamon><successful>true</successful><message>CONTENT IS CURRENT</message></cinnamon>");
         } else {
+            log.debug("Object is not current");
             sendContentFile(response);
         }
     }
@@ -83,11 +86,24 @@ public class TestServlet extends HttpServlet {
     }
 
     private void sendContentFile(HttpServletResponse response) throws IOException {
+        waitIfRequired();
         response.setStatus(SC_OK);
         response.setContentType(APPLICATION_XML.getMimeType());
         response.setHeader(CONTENT_DISPOSITION, String.format("attachment; filename=\"%s\"", "GenericResponse.xml"));
         ObjectMapper mapper = new XmlMapper();
         mapper.writeValue(response.getWriter(), GENERIC_RESPONSE);
+    }
+
+    private void waitIfRequired(){
+        if(waitForMillis == 0){
+            return;
+        }
+        try{
+            Thread.sleep(waitForMillis);
+        }
+        catch (InterruptedException e){
+            throw new RuntimeException(e);
+        }
     }
 
 }

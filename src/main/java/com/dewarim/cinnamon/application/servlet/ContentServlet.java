@@ -76,7 +76,11 @@ public class ContentServlet extends HttpServlet {
                     String isCurrentUrl = remoteConfig.generateIsCurrentUrl();
                     HttpResponse httpResponse = Request.Post(isCurrentUrl)
                             .addHeader("ticket", ticket)
-                            .bodyForm(Form.form().add("id", id.toString()).build())
+                            .bodyForm(Form.form()
+                                    .add("id", id.toString())
+                                    .add("hash", meta.getContentHash())
+                                    .build()
+                            )
                             .execute().returnResponse();
                     StatusLine statusLine = httpResponse.getStatusLine();
                     int        statusCode = statusLine.getStatusCode();
@@ -150,7 +154,9 @@ public class ContentServlet extends HttpServlet {
         String       getContentUrl = remoteConfig.generateGetContentUrl();
         HttpResponse httpResponse = Request.Post(getContentUrl)
                 .addHeader("ticket", ticket)
-                .bodyForm(Form.form().add("id", id.toString()).build())
+                .bodyForm(Form.form()
+                        .add("id", id.toString())
+                        .build())
                 .execute().returnResponse();
         StatusLine statusLine = httpResponse.getStatusLine();
         int        statusCode = statusLine.getStatusCode();

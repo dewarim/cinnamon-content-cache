@@ -4,7 +4,7 @@ public class ServerConfig {
     
     private int port = 9090;
     private String systemRoot = "/opt/cinnamon/cinnamon-system";
-    private String dataRoot = "/opt/cinnamon/cinnamon-data";
+    private String dataRoot = "/opt/cinnamon/cinnamon-cache";
 
     public int getPort() {
         return port;

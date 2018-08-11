@@ -11,6 +11,7 @@ import com.dewarim.cinnamon.provider.FileSystemContentProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.fluent.Form;
@@ -112,7 +113,6 @@ public class ContentServlet extends HttpServlet {
                     meta = contentProvider.writeContentStream(meta, httpResponse.getEntity().getContent());
                     lockService.switchToReadLock(id);
                     contentStream = contentProvider.getContentStream(meta);
-
                 }
 
                 // send content to client
@@ -139,8 +139,12 @@ public class ContentServlet extends HttpServlet {
     }
 
     private ContentMeta getMetaFromResponse(Long id, HttpResponse response) {
-        String      disposition = response.getFirstHeader(CONTENT_DISPOSITION).getValue();
-        String      filename    = disposition.replaceAll("attachment;\\s*filename=\"(^[\"]+)", "$1");
+        String filename = id.toString();
+        Header header   = response.getFirstHeader(CONTENT_DISPOSITION);
+        if (header != null) {
+            String disposition = header.getValue();
+            filename = disposition.replaceAll("attachment;\\s*filename=\"(^[\"]+)", "$1");
+        }
         String      contentType = response.getFirstHeader("Content-Type").getValue();
         ContentMeta contentMeta = new ContentMeta();
         contentMeta.setId(id);

@@ -5,8 +5,8 @@ public class RemoteConfig {
     private String  hostname   = "localhost";
     private String  protocol   = "http";
     private Integer port       = 8080;
-    private String  contentUrl = "/cinnamon/cinnamon/legacy?command=getcontent";
-    private String  currentUrl = "/cinnamon/cinnamon/legacy?command=iscurrent";
+    private String  contentUrl = "/cinnamon/osd/getContent";
+    private String  currentUrl = "/cinnamon/osd/isCurrent";
 
     public RemoteConfig() {
     }

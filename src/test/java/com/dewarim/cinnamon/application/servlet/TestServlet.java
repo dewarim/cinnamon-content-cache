@@ -68,7 +68,7 @@ public class TestServlet extends HttpServlet {
             log.debug("Object is current");
             response.setStatus(SC_NOT_MODIFIED);
             response.setContentType(APPLICATION_XML.getMimeType());
-            response.getWriter().print("<cinnamon><successful>true</successful><message>CONTENT IS CURRENT</message></cinnamon>");
+            response.getWriter().print("<cinnamon><successful>true</successful><status>CONTENT IS CURRENT</status></cinnamon>");
         } else {
             log.debug("Object is not current");
             sendContentFile(response);

@@ -1,0 +1,16 @@
+<CinnamonConfig>
+  <serverConfig>
+    <port>9090</port>
+    <systemRoot>/opt/cinnamon/cinnamon-system</systemRoot>
+    <dataRoot>/opt/cinnamon/cinnamon-cache</dataRoot>
+  </serverConfig>
+  <logbackLoggingConfigPath>/opt/cinnamon/logback.xml</logbackLoggingConfigPath>
+  <systemAdministratorEmail/>
+  <remoteConfig>
+    <hostname>localhost</hostname>
+    <protocol>http</protocol>
+    <port>8080</port>
+    <contentUrl>/cinnamon/osd/getContentXml</contentUrl>
+    <currentUrl>/cinnamon/osd/isCurrent</currentUrl>
+  </remoteConfig>
+</CinnamonConfig>

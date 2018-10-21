@@ -57,7 +57,7 @@ public class Reaper implements Runnable {
                     HttpResponse httpResponse = Request.Post(existsUrl)
                             .bodyForm(Form.form()
                                     .add("id", contentMeta.getId().toString())
-                                    .add("contentHash", contentMeta.getContentHash())
+                                    .add("accessToken", remoteConfig.getReaperAccessToken())
                                     .build()
                             )
                             .execute().returnResponse();

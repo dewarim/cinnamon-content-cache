@@ -197,7 +197,7 @@ public class ContentServletIntegrationTest extends CinnamonIntegrationTest {
     public void reaperTest() throws IOException, InterruptedException {
         String      dataRoot    = CinnamonCacheServer.config.getServerConfig().getDataRoot();
         ContentMeta contentMeta = createContentMeta(999L, Paths.get(dataRoot));
-        TestServlet.nonExistingHash = contentMeta.getContentHash();
+        TestServlet.nonExistingId = contentMeta.getContentHash();
         log.debug("created contentMeta {}", contentMeta);
         Thread.sleep(1000L);
         FileSystemContentProvider contentProvider = new FileSystemContentProvider();

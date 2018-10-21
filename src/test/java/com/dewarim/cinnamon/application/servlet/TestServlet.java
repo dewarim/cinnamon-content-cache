@@ -1,24 +1,18 @@
 package com.dewarim.cinnamon.application.servlet;
 
-import com.dewarim.cinnamon.application.ErrorCode;
-import com.dewarim.cinnamon.application.ErrorResponseGenerator;
-import com.dewarim.cinnamon.model.ContentMeta;
-import com.dewarim.cinnamon.model.request.ContentRequest;
+import com.dewarim.cinnamon.application.CinnamonCacheServer;
 import com.dewarim.cinnamon.model.response.GenericResponse;
-import com.dewarim.cinnamon.provider.FileSystemContentProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Optional;
 
 import static javax.servlet.http.HttpServletResponse.*;
 import static org.apache.http.entity.ContentType.APPLICATION_XML;
@@ -37,7 +31,7 @@ public class TestServlet extends HttpServlet {
     public static        boolean         hasContent       = true;
     public static        int             statusCode       = SC_OK;
     public static        long            waitForMillis    = 0;
-    public static        String          nonExistingHash  = "";
+    public static        String          nonExistingId    = "";
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
@@ -68,8 +62,13 @@ public class TestServlet extends HttpServlet {
     }
 
     private void exists(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String contentHash = request.getParameter("contentHash");
-        if (contentHash.equals(nonExistingHash)) {
+        String accessToken = request.getParameter("accessToken");
+        if(!accessToken.equals(CinnamonCacheServer.config.getRemoteConfig().getReaperAccessToken())){
+            response.setStatus(SC_UNAUTHORIZED);
+            return;
+        }
+        String id = request.getParameter("id");
+        if (id.equals(nonExistingId)) {
             response.setStatus(SC_NO_CONTENT);
         }
         else {

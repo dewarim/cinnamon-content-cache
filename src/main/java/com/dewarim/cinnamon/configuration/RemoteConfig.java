@@ -2,12 +2,13 @@ package com.dewarim.cinnamon.configuration;
 
 public class RemoteConfig {
 
-    private String  hostname   = "localhost";
-    private String  protocol   = "http";
-    private Integer port       = 8080;
-    private String  contentUrl = "/cinnamon/osd/getContentXml";
-    private String  currentUrl = "/cinnamon/osd/isCurrent";
-    private String  existsUrl  = "/cinnamon/osd/exists";
+    private String  hostname          = "localhost";
+    private String  protocol          = "http";
+    private Integer port              = 8080;
+    private String  contentUrl        = "/cinnamon/osd/getContentXml";
+    private String  currentUrl        = "/cinnamon/osd/isCurrent";
+    private String  existsUrl         = "/cinnamon/osd/exists";
+    private String  reaperAccessToken = "REAPER_ACCESS_TOKEN";
 
     public RemoteConfig() {
     }
@@ -70,6 +71,14 @@ public class RemoteConfig {
 
     public void setExistsUrl(String existsUrl) {
         this.existsUrl = existsUrl;
+    }
+
+    public String getReaperAccessToken() {
+        return reaperAccessToken;
+    }
+
+    public void setReaperAccessToken(String reaperAccessToken) {
+        this.reaperAccessToken = reaperAccessToken;
     }
 
     @Override

@@ -3,7 +3,6 @@ package com.dewarim.cinnamon.test.integration;
 
 import com.dewarim.cinnamon.application.CinnamonCacheServer;
 import com.dewarim.cinnamon.application.ErrorCode;
-import com.dewarim.cinnamon.application.LockService;
 import com.dewarim.cinnamon.application.UrlMapping;
 import com.dewarim.cinnamon.application.servlet.TestServlet;
 import com.dewarim.cinnamon.configuration.CinnamonConfig;
@@ -28,17 +27,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayDeque;
-import java.util.Queue;
+import java.util.Optional;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.dewarim.cinnamon.application.servlet.TestServlet.GENERIC_RESPONSE;
 import static org.apache.http.HttpStatus.*;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 public class ContentServletIntegrationTest extends CinnamonIntegrationTest {
 
@@ -55,6 +52,7 @@ public class ContentServletIntegrationTest extends CinnamonIntegrationTest {
         remoteConfig = config.getRemoteConfig();
         remoteConfig.setContentUrl("/test/getContent");
         remoteConfig.setCurrentUrl("/test/isCurrent");
+        remoteConfig.setExistsUrl("/test/exists");
         remoteConfig.setPort(cinnamonTestPort);
     }
 
@@ -195,8 +193,26 @@ public class ContentServletIntegrationTest extends CinnamonIntegrationTest {
 
     }
 
+    @Test
+    public void reaperTest() throws IOException, InterruptedException {
+        String      dataRoot    = CinnamonCacheServer.config.getServerConfig().getDataRoot();
+        ContentMeta contentMeta = createContentMeta(999L, Paths.get(dataRoot));
+        TestServlet.nonExistingHash = contentMeta.getContentHash();
+        log.debug("created contentMeta {}", contentMeta);
+        Thread.sleep(1000L);
+        FileSystemContentProvider contentProvider = new FileSystemContentProvider();
+        File                      contentFile     = contentProvider.getContentFile(contentMeta);
+        Optional<ContentMeta>     deletedMeta     = contentProvider.getContentMeta(contentMeta.getId());
+        assertFalse(contentFile.exists());
+        assertFalse(deletedMeta.isPresent());
+    }
+
     private ContentMeta createContentMeta(Long id) throws IOException {
         Path tempDir = Files.createTempDirectory("cinnamon-content-cache-test-");
+        return createContentMeta(id, tempDir);
+    }
+
+    private ContentMeta createContentMeta(Long id, Path tempDir) throws IOException {
         config.getServerConfig().setDataRoot(tempDir.toFile().getAbsolutePath());
         FileSystemContentProvider contentProvider = new FileSystemContentProvider();
         FileInputStream           inputStream     = new FileInputStream("pom.xml");

@@ -37,6 +37,7 @@ public class TestServlet extends HttpServlet {
     public static        boolean         hasContent       = true;
     public static        int             statusCode       = SC_OK;
     public static        long            waitForMillis    = 0;
+    public static        String          nonExistingHash  = "";
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
@@ -57,10 +58,23 @@ public class TestServlet extends HttpServlet {
             case "/isCurrent":
                 isCurrent(request, response);
                 break;
+            case "/exists":
+                exists(request, response);
+                break;
             default:
                 response.setStatus(HttpServletResponse.SC_NO_CONTENT);
         }
 
+    }
+
+    private void exists(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String contentHash = request.getParameter("contentHash");
+        if (contentHash.equals(nonExistingHash)) {
+            response.setStatus(SC_NO_CONTENT);
+        }
+        else {
+            response.setStatus(SC_OK);
+        }
     }
 
     private void isCurrent(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -94,14 +108,13 @@ public class TestServlet extends HttpServlet {
         mapper.writeValue(response.getWriter(), GENERIC_RESPONSE);
     }
 
-    private void waitIfRequired(){
-        if(waitForMillis == 0){
+    private void waitIfRequired() {
+        if (waitForMillis == 0) {
             return;
         }
-        try{
+        try {
             Thread.sleep(waitForMillis);
-        }
-        catch (InterruptedException e){
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }

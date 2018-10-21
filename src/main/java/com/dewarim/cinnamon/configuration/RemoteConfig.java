@@ -7,6 +7,7 @@ public class RemoteConfig {
     private Integer port       = 8080;
     private String  contentUrl = "/cinnamon/osd/getContentXml";
     private String  currentUrl = "/cinnamon/osd/isCurrent";
+    private String  existsUrl  = "/cinnamon/osd/exists";
 
     public RemoteConfig() {
     }
@@ -17,6 +18,10 @@ public class RemoteConfig {
 
     public String generateIsCurrentUrl() {
         return String.format("%s://%s:%d%s", protocol, hostname, port, currentUrl);
+    }
+
+    public String generateExistsUrl() {
+        return String.format("%s://%s:%d%s", protocol, hostname, port, existsUrl);
     }
 
     public String getHostname() {
@@ -57,6 +62,14 @@ public class RemoteConfig {
 
     public void setCurrentUrl(String currentUrl) {
         this.currentUrl = currentUrl;
+    }
+
+    public String getExistsUrl() {
+        return existsUrl;
+    }
+
+    public void setExistsUrl(String existsUrl) {
+        this.existsUrl = existsUrl;
     }
 
     @Override

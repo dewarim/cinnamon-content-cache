@@ -38,6 +38,13 @@ public class FileSystemContentProvider {
         return new FileInputStream(target);
     }
 
+    public File getContentFile(ContentMeta metadata) {
+        Long   id               = metadata.getId();
+        String subfolderName    = getSubFolderName(id);
+        String subfolderPath    = dataRootPath + SEP + subfolderName;
+        return new File(subfolderPath, id.toString());
+    }
+
     public Optional<ContentMeta> getContentMeta(long id) {
         String subfolderName = getSubFolderName(id);
         String subfolderPath = dataRootPath + SEP + subfolderName;

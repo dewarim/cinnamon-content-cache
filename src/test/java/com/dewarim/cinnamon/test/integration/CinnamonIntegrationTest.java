@@ -4,6 +4,7 @@ import com.dewarim.cinnamon.application.CinnamonCacheServer;
 import com.dewarim.cinnamon.application.ErrorCode;
 import com.dewarim.cinnamon.application.UrlMapping;
 import com.dewarim.cinnamon.application.servlet.TestServlet;
+import com.dewarim.cinnamon.configuration.ServerConfig;
 import com.dewarim.cinnamon.model.response.CinnamonError;
 import com.dewarim.cinnamon.model.response.GenericResponse;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -34,14 +35,21 @@ public class CinnamonIntegrationTest {
     
     @BeforeClass
     public static void setUpServer() throws Exception{
+
+
         if(cinnamonCacheServer == null) {
             cinnamonCacheServer = new CinnamonCacheServer(cinnamonTestPort);
             cinnamonCacheServer.getWebAppContext().addServlet(TestServlet.class, "/test/*");
-            cinnamonCacheServer.start();
+
+            // set reaper thread to sleep only for 500ms instead of 5 minutes:
+            ServerConfig serverConfig = CinnamonCacheServer.config.getServerConfig();
+            serverConfig.setReaperIntervalInMillis(500);
 
             // set data root:
             Path tempDirectory = Files.createTempDirectory("cinnamon-data-root");
             CinnamonCacheServer.config.getServerConfig().setDataRoot(tempDirectory.toAbsolutePath().toString());
+
+            cinnamonCacheServer.start();
         }
     }
 

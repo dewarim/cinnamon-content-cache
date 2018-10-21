@@ -20,10 +20,11 @@ import java.io.IOException;
  */
 public class CinnamonCacheServer {
 
-    private int                  port;
-    private Server               server;
-    private WebAppContext        webAppContext = new WebAppContext();
+    private       int            port;
+    private       Server         server;
+    private       WebAppContext  webAppContext = new WebAppContext();
     public static CinnamonConfig config        = new CinnamonConfig();
+    private       Thread         reaperThread;
 
     public CinnamonCacheServer(int port) {
         this.port = port;
@@ -35,37 +36,46 @@ public class CinnamonCacheServer {
         addServlets(webAppContext);
 
         server.setHandler(webAppContext);
+
+
     }
 
     public void start() throws Exception {
         server.start();
+        awakenTheReaper();
     }
 
+    private void awakenTheReaper(){
+        Reaper reaper = new Reaper();
+        reaperThread = new Thread(reaper);
+        reaperThread.setName("Reaper");
+        reaperThread.start();
+    }
 
     private void addServlets(WebAppContext handler) {
         handler.addServlet(ContentServlet.class, "/content/*");
     }
 
     public static void main(String[] args) throws Exception {
-        Args cliArguments = new Args();
-        JCommander commander = JCommander.newBuilder().addObject(cliArguments).build();
+        Args       cliArguments = new Args();
+        JCommander commander    = JCommander.newBuilder().addObject(cliArguments).build();
         commander.parse(args);
-        
-        if((cliArguments.help)){
+
+        if ((cliArguments.help)) {
             commander.setColumnSize(80);
             commander.usage();
             return;
         }
-        
+
         if (cliArguments.writeConfigFile != null) {
             writeConfig(cliArguments.writeConfigFile);
             return;
         }
-        
+
         if (cliArguments.configFilename != null) {
             config = readConfig(cliArguments.configFilename);
         }
-        
+
         if (cliArguments.port != null) {
             config.getServerConfig().setPort(cliArguments.port);
         }
@@ -111,7 +121,7 @@ public class CinnamonCacheServer {
         @Parameter(names = {"--config", "-c"}, description = "Where to load the configuration file from")
         String configFilename;
 
-        @Parameter(names = {"--help","-h"}, help = true, description = "Display help text.")
+        @Parameter(names = {"--help", "-h"}, help = true, description = "Display help text.")
         boolean help;
     }
 

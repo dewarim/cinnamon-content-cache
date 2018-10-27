@@ -42,7 +42,8 @@ public class CinnamonCacheServer {
 
     public void start() throws Exception {
         server.start();
-        awakenTheReaper();
+        // commented out: a) default config gets 404 from server, b) TODO: extract into extra class for cron jobs.
+//        awakenTheReaper();
     }
 
     private void awakenTheReaper(){

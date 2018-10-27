@@ -48,4 +48,15 @@ public class ServerConfig {
             this.reaperIntervalInMillis = reaperIntervalInMillis;
         }
     }
+
+    @Override
+    public String toString() {
+        return "ServerConfig{" +
+                "REAPER_LOCK=" + REAPER_LOCK +
+                ", port=" + port +
+                ", systemRoot='" + systemRoot + '\'' +
+                ", dataRoot='" + dataRoot + '\'' +
+                ", reaperIntervalInMillis=" + reaperIntervalInMillis +
+                '}';
+    }
 }

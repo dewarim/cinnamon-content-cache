@@ -114,6 +114,8 @@ public class TestServlet extends HttpServlet {
         try {
             Thread.sleep(waitForMillis);
         } catch (InterruptedException e) {
+            log.debug("Thread was interrupted.");
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
     }

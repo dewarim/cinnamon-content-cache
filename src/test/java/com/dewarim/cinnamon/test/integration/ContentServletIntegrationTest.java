@@ -19,6 +19,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.util.BlockingArrayQueue;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -45,15 +46,19 @@ public class ContentServletIntegrationTest extends CinnamonIntegrationTest {
     CinnamonConfig config;
     RemoteConfig   remoteConfig;
     ObjectMapper   mapper = new XmlMapper();
+    Path           tempDir;
 
     @Before
-    public void setup() {
+    public void setup() throws IOException {
         config = CinnamonCacheServer.config;
         remoteConfig = config.getRemoteConfig();
         remoteConfig.setContentUrl("/test/getContent");
         remoteConfig.setCurrentUrl("/test/isCurrent");
         remoteConfig.setExistsUrl("/test/exists");
         remoteConfig.setPort(cinnamonTestPort);
+
+        tempDir = Files.createTempDirectory("cinnamon-content-cache-test-");
+
     }
 
     @Test
@@ -193,6 +198,7 @@ public class ContentServletIntegrationTest extends CinnamonIntegrationTest {
 
     }
 
+    @Ignore("TODO: refactor Reaper")
     @Test
     public void reaperTest() throws IOException, InterruptedException {
         String      dataRoot    = CinnamonCacheServer.config.getServerConfig().getDataRoot();
@@ -208,7 +214,6 @@ public class ContentServletIntegrationTest extends CinnamonIntegrationTest {
     }
 
     private ContentMeta createContentMeta(Long id) throws IOException {
-        Path tempDir = Files.createTempDirectory("cinnamon-content-cache-test-");
         return createContentMeta(id, tempDir);
     }
 

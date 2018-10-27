@@ -31,17 +31,17 @@ public class FileSystemContentProvider {
 
 
     public InputStream getContentStream(ContentMeta metadata) throws IOException {
-        Long   id               = metadata.getId();
-        String subfolderName    = getSubFolderName(id);
-        String subfolderPath    = dataRootPath + SEP + subfolderName;
-        File   target           = new File(subfolderPath, id.toString());
+        Long   id            = metadata.getId();
+        String subfolderName = getSubFolderName(id);
+        String subfolderPath = dataRootPath + SEP + subfolderName;
+        File   target        = new File(subfolderPath, id.toString());
         return new FileInputStream(target);
     }
 
     public File getContentFile(ContentMeta metadata) {
-        Long   id               = metadata.getId();
-        String subfolderName    = getSubFolderName(id);
-        String subfolderPath    = dataRootPath + SEP + subfolderName;
+        Long   id            = metadata.getId();
+        String subfolderName = getSubFolderName(id);
+        String subfolderPath = dataRootPath + SEP + subfolderName;
         return new File(subfolderPath, id.toString());
     }
 
@@ -58,20 +58,21 @@ public class FileSystemContentProvider {
                 return Optional.empty();
             }
         }
+        log.debug("getContentMeta for {} found no cached data", id);
         return Optional.empty();
     }
 
     public ContentMeta writeContentStream(ContentMeta metadata, InputStream inputStream) throws IOException {
-        Long   id               = metadata.getId();
-        String subfolderName    = getSubFolderName(id);
-        String subfolderPath    = dataRootPath + SEP + subfolderName;
-        File   subfolder        = new File(subfolderPath);
+        Long   id            = metadata.getId();
+        String subfolderName = getSubFolderName(id);
+        String subfolderPath = dataRootPath + SEP + subfolderName;
+        File   subfolder     = new File(subfolderPath);
 
         boolean result = subfolder.mkdirs();
         log.debug("created subfolder {}: {}", subfolderPath, result);
-        String contentPath  = subfolderPath + SEP + id ;
-        Path   contentFile  = Paths.get(subfolderPath, id.toString());
-        long   bytesWritten = Files.copy(inputStream, contentFile, StandardCopyOption.REPLACE_EXISTING);
+        String contentPath = subfolderPath + SEP + id;
+        Path   contentFile = Paths.get(subfolderPath, id.toString());
+        long bytesWritten = Files.copy(inputStream, contentFile, StandardCopyOption.REPLACE_EXISTING);
 
         ContentMeta lightMeta = new ContentMeta();
         lightMeta.setContentSize(bytesWritten);

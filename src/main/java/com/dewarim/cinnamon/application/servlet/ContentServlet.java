@@ -85,6 +85,7 @@ public class ContentServlet extends HttpServlet {
                             .execute().returnResponse();
                     StatusLine statusLine = httpResponse.getStatusLine();
                     int        statusCode = statusLine.getStatusCode();
+                    log.debug("Response code for isCurrent for {} is {}.", id, statusCode);
                     switch (statusCode) {
                         case SC_NOT_MODIFIED:
                             lockService.switchToReadLock(id);

@@ -85,8 +85,12 @@ public class RemoteConfig {
     public String toString() {
         return "RemoteConfig{" +
                 "hostname='" + hostname + '\'' +
+                ", protocol='" + protocol + '\'' +
                 ", port=" + port +
                 ", contentUrl='" + contentUrl + '\'' +
+                ", currentUrl='" + currentUrl + '\'' +
+                ", existsUrl='" + existsUrl + '\'' +
+                ", reaperAccessToken='" + "*** FILTERED ***" + '\'' +
                 '}';
     }
 }

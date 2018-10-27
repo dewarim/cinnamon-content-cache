@@ -92,6 +92,7 @@ public class LockService {
                             }
                     );
         }
+        log.debug("switched to readLock for {}",id);
     }
 
     /**
@@ -106,7 +107,7 @@ public class LockService {
 
         try {
             while (System.currentTimeMillis() - startTime < WAITING_PERIOD) {
-                log.debug("sleep for {}", CHECK_PERIOD);
+                log.debug("switchToWriteLock sleep for {}", CHECK_PERIOD);
                 Thread.sleep(CHECK_PERIOD);
 
                 if (gotWriteLock(id)) {
@@ -146,7 +147,7 @@ public class LockService {
 
         try {
             while (System.currentTimeMillis() - startTime < WAITING_PERIOD) {
-                log.debug("sleep for {}", CHECK_PERIOD);
+                log.debug("switchToVerifyLock: leep for {}", CHECK_PERIOD);
                 Thread.sleep(CHECK_PERIOD);
 
                 if (gotVerifyLock(id)) {

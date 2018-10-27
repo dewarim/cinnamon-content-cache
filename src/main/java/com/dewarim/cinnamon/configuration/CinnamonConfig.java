@@ -1,8 +1,5 @@
 package com.dewarim.cinnamon.configuration;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class CinnamonConfig {
     
     private ServerConfig serverConfig = new ServerConfig();
@@ -43,5 +40,15 @@ public class CinnamonConfig {
 
     public void setRemoteConfig(RemoteConfig remoteConfig) {
         this.remoteConfig = remoteConfig;
+    }
+
+    @Override
+    public String toString() {
+        return "CinnamonConfig{" +
+                "serverConfig=" + serverConfig +
+                ", logbackLoggingConfigPath='" + logbackLoggingConfigPath + '\'' +
+                ", systemAdministratorEmail='" + systemAdministratorEmail + '\'' +
+                ", remoteConfig=" + remoteConfig +
+                '}';
     }
 }

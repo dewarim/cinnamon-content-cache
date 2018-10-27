@@ -7,7 +7,7 @@ public class RemoteConfig {
     private Integer port              = 8080;
     private String  contentUrl        = "/cinnamon/osd/getContentXml";
     private String  currentUrl        = "/cinnamon/osd/isCurrent";
-    private String  existsUrl         = "/cinnamon/osd/exists";
+    private String  existsUrl         = "/cinnamon/osd/checkObjectsExist";
     private String  reaperAccessToken = "REAPER_ACCESS_TOKEN";
 
     public RemoteConfig() {

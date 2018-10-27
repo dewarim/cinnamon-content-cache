@@ -26,6 +26,9 @@ public class CinnamonCacheServer {
     public static CinnamonConfig config        = new CinnamonConfig();
     private       Thread         reaperThread;
 
+    public CinnamonCacheServer() {
+    }
+
     public CinnamonCacheServer(int port) {
         this.port = port;
         server = new Server(port);
@@ -42,15 +45,6 @@ public class CinnamonCacheServer {
 
     public void start() throws Exception {
         server.start();
-        // commented out: a) default config gets 404 from server, b) TODO: extract into extra class for cron jobs.
-//        awakenTheReaper();
-    }
-
-    private void awakenTheReaper(){
-        Reaper reaper = new Reaper();
-        reaperThread = new Thread(reaper);
-        reaperThread.setName("Reaper");
-        reaperThread.start();
     }
 
     private void addServlets(WebAppContext handler) {
@@ -128,5 +122,9 @@ public class CinnamonCacheServer {
 
     public WebAppContext getWebAppContext() {
         return webAppContext;
+    }
+
+    public static void setConfig(CinnamonConfig config) {
+        CinnamonCacheServer.config = config;
     }
 }

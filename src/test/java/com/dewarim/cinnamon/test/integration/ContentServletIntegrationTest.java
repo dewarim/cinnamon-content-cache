@@ -36,7 +36,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import static com.dewarim.cinnamon.application.servlet.TestServlet.GENERIC_RESPONSE;
 import static org.apache.http.HttpStatus.*;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 public class ContentServletIntegrationTest extends CinnamonIntegrationTest {
 
@@ -198,26 +197,11 @@ public class ContentServletIntegrationTest extends CinnamonIntegrationTest {
 
     }
 
-    @Ignore("TODO: refactor Reaper")
-    @Test
-    public void reaperTest() throws IOException, InterruptedException {
-        String      dataRoot    = CinnamonCacheServer.config.getServerConfig().getDataRoot();
-        ContentMeta contentMeta = createContentMeta(999L, Paths.get(dataRoot));
-        TestServlet.nonExistingId = contentMeta.getContentHash();
-        log.debug("created contentMeta {}", contentMeta);
-        Thread.sleep(1000L);
-        FileSystemContentProvider contentProvider = new FileSystemContentProvider();
-        File                      contentFile     = contentProvider.getContentFile(contentMeta);
-        Optional<ContentMeta>     deletedMeta     = contentProvider.getContentMeta(contentMeta.getId());
-        assertFalse(contentFile.exists());
-        assertFalse(deletedMeta.isPresent());
-    }
-
     private ContentMeta createContentMeta(Long id) throws IOException {
-        return createContentMeta(id, tempDir);
+        return createContentMeta(config, id, tempDir);
     }
 
-    private ContentMeta createContentMeta(Long id, Path tempDir) throws IOException {
+    public static ContentMeta createContentMeta(CinnamonConfig config, Long id, Path tempDir) throws IOException {
         config.getServerConfig().setDataRoot(tempDir.toFile().getAbsolutePath());
         FileSystemContentProvider contentProvider = new FileSystemContentProvider();
         FileInputStream           inputStream     = new FileInputStream("pom.xml");

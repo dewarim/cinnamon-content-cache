@@ -1,6 +1,7 @@
 package com.dewarim.cinnamon.application.servlet;
 
 import com.dewarim.cinnamon.application.CinnamonCacheServer;
+import com.dewarim.cinnamon.application.Reaper;
 import com.dewarim.cinnamon.model.response.GenericResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -62,17 +63,24 @@ public class TestServlet extends HttpServlet {
     }
 
     private void exists(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String accessToken = request.getParameter("accessToken");
-        if(!accessToken.equals(CinnamonCacheServer.config.getRemoteConfig().getReaperAccessToken())){
+        String ids = request.getParameter("ids");
+        log.debug("exists request: "+ids);
+        Reaper.CinnamonIdList idList = new XmlMapper().readValue(ids, Reaper.CinnamonIdList.class);
+        String accessToken = idList.getAccessToken();
+        if (!accessToken.equals(CinnamonCacheServer.config.getRemoteConfig().getReaperAccessToken())) {
             response.setStatus(SC_UNAUTHORIZED);
             return;
         }
-        String id = request.getParameter("id");
+        String id = idList.getIds().get(0).toString();
+        response.setStatus(SC_OK);
+        response.setContentType(APPLICATION_XML.getMimeType());
+
         if (id.equals(nonExistingId)) {
-            response.setStatus(SC_NO_CONTENT);
-        }
-        else {
-            response.setStatus(SC_OK);
+            idList.getIds().clear();
+            new XmlMapper().writeValue(response.getWriter(), idList);
+        } else {
+            idList.getIds().add(Long.valueOf(id));
+            new XmlMapper().writeValue(response.getWriter(), idList);
         }
     }
 

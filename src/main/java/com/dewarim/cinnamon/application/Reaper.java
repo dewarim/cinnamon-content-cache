@@ -1,5 +1,7 @@
 package com.dewarim.cinnamon.application;
 
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameter;
 import com.dewarim.cinnamon.configuration.RemoteConfig;
 import com.dewarim.cinnamon.model.ContentMeta;
 import com.dewarim.cinnamon.provider.FileSystemContentProvider;
@@ -27,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.dewarim.cinnamon.application.CinnamonCacheServer.readConfig;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 
 /**
@@ -69,9 +72,11 @@ public class Reaper {
 
         final List<Long> ids = validContentFiles.stream().map(ContentMeta::getId).collect(Collectors.toList());
 
-        int batchSize = (ids.size() / Math.max(1000, ids.size() / 1000)) + 1;
+        int idCount = ids.size();
+        int batchSize = (idCount / Math.max(1000, idCount / 1000)) + 1;
 
         final List<Long> removedIds = new ArrayList<>();
+        // ids list will shrink due to entries being deleted via sublist() + clear().
         while (ids.size() > 0) {
             String         existsUrl    = remoteConfig.generateExistsUrl();
             CinnamonIdList idList       = new CinnamonIdList();
@@ -107,9 +112,9 @@ public class Reaper {
                         InputStream inputStream = httpResponse.getEntity().getContent();
                         String body = IOUtils.toString(inputStream, Charset.forName("UTF-8"));
                         log.debug("Unexpected response code for osd::checkObjectsExist(ids): {} {}", statusCode, body);
-
                 }
                 currentBatch.clear();
+                log.info("Remaining ids to check: {}",ids.size());
             } catch (Exception e) {
                 log.warn("Failed to check cache files due to:", e);
                 throw new RuntimeException(e);
@@ -118,7 +123,7 @@ public class Reaper {
         }
 
         List<ContentMeta> toDelete = validContentFiles.stream().filter(contentMeta -> removedIds.contains(contentMeta.getId())).collect(Collectors.toList());
-
+        log.info("Going to delete {} stale cache entries.",toDelete.size());
         toDelete.forEach(contentMeta -> {
             String metadataPath = contentMeta.getContentPath() + ".xml";
             log.debug("Delete metadata @ {}", metadataPath);
@@ -160,11 +165,20 @@ public class Reaper {
     }
 
     public static void main(String[] args) {
-        if (args.length != 1) {
-            System.out.println("Reaper requires one parameter: the path to CinnamonCacheServer config.xml file.");
+        Reaper.Args cliArguments = new Reaper.Args();
+        JCommander                      commander    = JCommander.newBuilder().addObject(cliArguments).build();
+        commander.parse(args);
+
+        if ((cliArguments.help)) {
+            commander.setColumnSize(80);
+            commander.usage();
             return;
         }
-        CinnamonCacheServer.setConfig(CinnamonCacheServer.readConfig(args[0]));
+
+        if (cliArguments.configFilename != null) {
+            CinnamonCacheServer.setConfig(readConfig(cliArguments.configFilename));
+        }
+
         try {
             new Reaper().run();
         } catch (IOException e) {
@@ -173,6 +187,15 @@ public class Reaper {
         }
 
     }
+
+    private static class Args {
+        @Parameter(names = {"--config", "-c"}, required = true, description = "Where to load the configuration file from")
+        String configFilename;
+
+        @Parameter(names = {"--help", "-h"}, help = true, description = "Display help text.")
+        boolean help;
+    }
+
 
     private Optional<ContentMeta> readContentMeta(Path file) {
         ObjectMapper objectMapper = new ObjectMapper();

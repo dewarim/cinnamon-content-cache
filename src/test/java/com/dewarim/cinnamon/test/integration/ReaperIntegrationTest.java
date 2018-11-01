@@ -21,6 +21,7 @@ import java.nio.file.Paths;
 import java.util.Optional;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class ReaperIntegrationTest extends CinnamonIntegrationTest {
 
@@ -48,6 +49,9 @@ public class ReaperIntegrationTest extends CinnamonIntegrationTest {
         ContentMeta contentMeta = ContentServletIntegrationTest.createContentMeta(config, 999L, Paths.get(dataRoot));
         TestServlet.nonExistingId = contentMeta.getId().toString();
         log.debug("created contentMeta {}", contentMeta);
+
+        ContentMeta doNotDelete = ContentServletIntegrationTest.createContentMeta(config, 222L, Paths.get(dataRoot));
+
         FileSystemContentProvider contentProvider = new FileSystemContentProvider();
         Reaper                    reaper          = new Reaper(dataRoot, remoteConfig, contentProvider);
         reaper.run();
@@ -55,6 +59,12 @@ public class ReaperIntegrationTest extends CinnamonIntegrationTest {
         Optional<ContentMeta> deletedMeta = contentProvider.getContentMeta(contentMeta.getId());
         assertFalse(contentFile.exists());
         assertFalse(deletedMeta.isPresent());
+
+        File notDeleted = contentProvider.getContentFile(doNotDelete);
+        Optional<ContentMeta> notDeletedMeta = contentProvider.getContentMeta(doNotDelete.getId());
+        assertTrue(notDeleted.exists());
+        assertTrue(notDeletedMeta.isPresent());
+
     }
 
 

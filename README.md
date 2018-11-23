@@ -19,8 +19,9 @@ A caching server for Cinnamon 3
         <port>9090</port>
         <systemRoot>/opt/cinnamon/cinnamon-system</systemRoot>
         <dataRoot>/opt/cinnamon/cinnamon-cache</dataRoot>
-        <!-- how often to check the cache for entries which have been deleted on master: -->
-        <reaperIntervalInMillis>300000</reaperIntervalInMillis>
+        <!-- timeout for downloads: use higher number on slower connections -->
+        <lockAcquisitionTimeoutMillis>300000</lockAcquisitionTimeoutMillis>
+       <lockAcquisitionCheckPeriodMillis>1000</lockAcquisitionCheckPeriodMillis>    
       </serverConfig>
       <!-- logging is not yet configurable yet: -->
       <logbackLoggingConfigPath>/opt/cinnamon/logback.xml</logbackLoggingConfigPath>

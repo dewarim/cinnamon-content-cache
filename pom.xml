@@ -4,9 +4,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.dewarim.cinnamon</groupId>
-    <artifactId>cinnamon-server</artifactId>
+    <artifactId>cinnamon-content-cache</artifactId>
     <packaging>jar</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.2.1</version>
     <name>cinnamon-server</name>
 
     <properties>

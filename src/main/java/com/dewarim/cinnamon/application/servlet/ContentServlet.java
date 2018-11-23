@@ -5,6 +5,7 @@ import com.dewarim.cinnamon.application.ErrorCode;
 import com.dewarim.cinnamon.application.ErrorResponseGenerator;
 import com.dewarim.cinnamon.application.LockService;
 import com.dewarim.cinnamon.configuration.RemoteConfig;
+import com.dewarim.cinnamon.configuration.ServerConfig;
 import com.dewarim.cinnamon.model.ContentMeta;
 import com.dewarim.cinnamon.model.request.*;
 import com.dewarim.cinnamon.provider.FileSystemContentProvider;
@@ -35,7 +36,13 @@ public class ContentServlet extends HttpServlet {
 
     private              ObjectMapper xmlMapper   = new XmlMapper();
     private static final Logger       log         = LogManager.getLogger(ContentServlet.class);
-    private final        LockService  lockService = new LockService();
+    private final        LockService  lockService;
+
+    public ContentServlet() {
+        ServerConfig serverConfig = CinnamonCacheServer.config.getServerConfig();
+        lockService = new LockService(serverConfig.getLockAcquisitionTimeoutMillis(),
+                serverConfig.getLockAcquisitionCheckPeriodMillis());
+    }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 

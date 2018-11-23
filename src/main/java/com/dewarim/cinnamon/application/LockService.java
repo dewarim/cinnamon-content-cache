@@ -12,11 +12,14 @@ public class LockService {
     private static final Logger log = LogManager.getLogger(LockService.class);
 
     private final Map<Long, List<ContentLock>> locks = new ConcurrentHashMap<>();
+    private final Object                       LOCK  = new Object();
+    private       long                         lockAcquisitionTimeoutMillis;
+    private       long                         lockAcquisitionCheckPeriodMillis;
 
-    private final Object LOCK           = new Object();
-    private       long   WAITING_PERIOD = 300_000L; // default: 5 min
-    private       long   CHECK_PERIOD   = 1000L;
-
+    public LockService(long lockAcquisitionTimeoutMillis, long lockAcquisitionCheckPeriodMillis) {
+        this.lockAcquisitionTimeoutMillis = lockAcquisitionTimeoutMillis;
+        this.lockAcquisitionCheckPeriodMillis = lockAcquisitionCheckPeriodMillis;
+    }
 
     private boolean gotVerifyLock(long id) {
         synchronized (LOCK) {
@@ -92,7 +95,7 @@ public class LockService {
                             }
                     );
         }
-        log.debug("switched to readLock for {}",id);
+        log.debug("switched to readLock for {}", id);
     }
 
     /**
@@ -106,9 +109,9 @@ public class LockService {
         long startTime = System.currentTimeMillis();
 
         try {
-            while (System.currentTimeMillis() - startTime < WAITING_PERIOD) {
-                log.debug("switchToWriteLock sleep for {}", CHECK_PERIOD);
-                Thread.sleep(CHECK_PERIOD);
+            while (System.currentTimeMillis() - startTime < lockAcquisitionTimeoutMillis) {
+                log.debug("switchToWriteLock sleep for {}", lockAcquisitionCheckPeriodMillis);
+                Thread.sleep(lockAcquisitionCheckPeriodMillis);
 
                 if (gotWriteLock(id)) {
                     log.debug("waiting is over, got write lock");
@@ -146,9 +149,9 @@ public class LockService {
         long startTime = System.currentTimeMillis();
 
         try {
-            while (System.currentTimeMillis() - startTime < WAITING_PERIOD) {
-                log.debug("switchToVerifyLock: leep for {}", CHECK_PERIOD);
-                Thread.sleep(CHECK_PERIOD);
+            while (System.currentTimeMillis() - startTime < lockAcquisitionTimeoutMillis) {
+                log.debug("switchToVerifyLock: leep for {}", lockAcquisitionCheckPeriodMillis);
+                Thread.sleep(lockAcquisitionCheckPeriodMillis);
 
                 if (gotVerifyLock(id)) {
                     log.debug("waiting is over, got verify lock");

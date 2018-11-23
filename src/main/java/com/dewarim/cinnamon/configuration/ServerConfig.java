@@ -2,15 +2,19 @@ package com.dewarim.cinnamon.configuration;
 
 public class ServerConfig {
 
-    /**
-     * Synchronization object so the integration test can change the sleep time of the reaper thread
-     * on the fly.
-     */
-    private final Object REAPER_LOCK = new Object();
-
-    private int port = 9090;
+    private int    port       = 9090;
     private String systemRoot = "/opt/cinnamon/cinnamon-system";
-    private String dataRoot = "/opt/cinnamon/cinnamon-cache";
+    private String dataRoot   = "/opt/cinnamon/cinnamon-cache";
+
+    /**
+     * How long to wait until lock acquisition for reading/writing content fails.
+     */
+    private long lockAcquisitionTimeoutMillis = 300_000L;
+
+    /**
+     * How long to wait before checking again if a user request can acquire a lock on a resource
+     */
+    private long lockAcquisitionCheckPeriodMillis = 1000L;
 
     public int getPort() {
         return port;
@@ -36,14 +40,30 @@ public class ServerConfig {
         this.dataRoot = dataRoot;
     }
 
+    public long getLockAcquisitionTimeoutMillis() {
+        return lockAcquisitionTimeoutMillis;
+    }
+
+    public void setLockAcquisitionTimeoutMillis(long lockAcquisitionTimeoutMillis) {
+        this.lockAcquisitionTimeoutMillis = lockAcquisitionTimeoutMillis;
+    }
+
+    public long getLockAcquisitionCheckPeriodMillis() {
+        return lockAcquisitionCheckPeriodMillis;
+    }
+
+    public void setLockAcquisitionCheckPeriodMillis(long lockAcquisitionCheckPeriodMillis) {
+        this.lockAcquisitionCheckPeriodMillis = lockAcquisitionCheckPeriodMillis;
+    }
 
     @Override
     public String toString() {
         return "ServerConfig{" +
-                "REAPER_LOCK=" + REAPER_LOCK +
-                ", port=" + port +
+                "port=" + port +
                 ", systemRoot='" + systemRoot + '\'' +
                 ", dataRoot='" + dataRoot + '\'' +
+                ", lockAcquisitionTimeoutMillis=" + lockAcquisitionTimeoutMillis +
+                ", lockAcquisitionCheckPeriodMillis=" + lockAcquisitionCheckPeriodMillis +
                 '}';
     }
 }

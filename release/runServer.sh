@@ -7,8 +7,10 @@
 
 nohup java -jar cinnamon-content-cache-1.2.jar --config config.xml > /dev/null 2>&1 &
 
-# alternative: for debugging, let nophup log to nohup.out:
+# alternative 1: for debugging, let nophup log to nohup.out:
 # nohup java -jar cinnamon-content-cache-1.0.jar --config config.xml &
+
+# alternative 2: use Gnu screen utility to run the process directly in a terminal session
 
 # to kill the server:
 # ps

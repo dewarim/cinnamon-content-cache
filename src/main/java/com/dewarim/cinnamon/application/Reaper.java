@@ -208,8 +208,5 @@ public class Reaper {
         }
     }
 
-    private long getReaperIntervalInMillis() {
-        return CinnamonCacheServer.config.getServerConfig().getReaperIntervalInMillis();
-    }
 
 }

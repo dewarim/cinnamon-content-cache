@@ -43,7 +43,6 @@ public class CinnamonIntegrationTest {
 
             // set reaper thread to sleep only for 500ms instead of 5 minutes:
             ServerConfig serverConfig = CinnamonCacheServer.config.getServerConfig();
-            serverConfig.setReaperIntervalInMillis(500);
 
             // set data root:
             Path tempDirectory = Files.createTempDirectory("cinnamon-data-root");

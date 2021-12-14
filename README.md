@@ -4,6 +4,10 @@ A caching server for Cinnamon 3
 
 ## Changelog
 
+## 1.3.0
+
+Upgrade dependencies due to log4j vulnerability.
+
 ### 1.2.1
 
 Make timeouts configurable:

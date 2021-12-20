@@ -6,13 +6,13 @@
     <groupId>com.dewarim.cinnamon</groupId>
     <artifactId>cinnamon-content-cache</artifactId>
     <packaging>jar</packaging>
-    <version>1.3.0</version>
+    <version>1.3.1</version>
     <name>cinnamon-server</name>
 
     <properties>
         <jetty-version>9.4.44.v20210927</jetty-version>
         <httpcomponents.version>4.5.13</httpcomponents.version>
-        <log4j.version>2.16.0</log4j.version>
+        <log4j.version>2.17.0</log4j.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <cucumber.version>1.2.5</cucumber.version>
     </properties>

@@ -92,6 +92,7 @@ public class ContentServletIntegrationTest extends CinnamonIntegrationTest {
     @Test
     public void remoteContentIsNewerThanCached() throws IOException {
         TestServlet.isCurrent = false;
+        TestServlet.waitForMillis=100L;
         Long           id             = 4L;
         ContentMeta    contentMeta    = createContentMeta(id);
         ContentRequest contentRequest = new ContentRequest(ticket, id);
@@ -101,7 +102,9 @@ public class ContentServletIntegrationTest extends CinnamonIntegrationTest {
         assertEquals(SC_OK, statusCode);
         byte[] expectedBytes = Files.readAllBytes(Paths.get(contentMeta.getContentPath()));
         byte[] actualBytes   = response.getEntity().getContent().readAllBytes();
-        assertEquals(new String(expectedBytes), new String(actualBytes));
+        String expected = new String(expectedBytes);
+        String actual = new String(actualBytes);
+        assertEquals(expected, actual);
     }
 
     @Test
